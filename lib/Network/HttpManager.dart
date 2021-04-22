@@ -127,8 +127,8 @@ ResultData resultError(DioError e) {
   } else {
     errorResponse = new Response(statusCode: 666);
   }
-  if (e.type == DioErrorType.CONNECT_TIMEOUT ||
-      e.type == DioErrorType.RECEIVE_TIMEOUT) {
+  if (e.type == DioErrorType.connectTimeout ||
+      e.type == DioErrorType.receiveTimeout) {
     errorResponse.statusCode = Code.NETWORK_TIMEOUT;
   }
   return new ResultData(
