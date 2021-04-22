@@ -4,11 +4,13 @@ import 'ResultData.dart';
 /// 数据初步处理
 class ResponseInterceptors extends InterceptorsWrapper {
   @override
-  onResponse(Response response) async {
-    RequestOptions option = response.request;
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    RequestOptions option = response.requestOptions;
+
     try {
       if (option.contentType != null && option.contentType.contains("text")) {
-        return new ResultData(response.data, true, 200);
+        response.data = ResultData(response.data, true, 200);
+        handler.next(response);
       }
 
       ///一般只需要处理200的情况，300、400、500保留错误信息，外层为http协议定义的响应码
@@ -17,21 +19,24 @@ class ResponseInterceptors extends InterceptorsWrapper {
 
         int code = response.data["code"];
         if (code == 0) {
-          return new ResultData(response.data, true, 200,
+          response.data = ResultData(response.data, true, 200,
               headers: response.headers);
+          handler.next(response);
         } else {
-          return new ResultData(response.data, false, 200,
+          response.data = ResultData(response.data, false, 200,
               headers: response.headers);
+          handler.next(response);
         }
       }
     } catch (e) {
       print("ResponseError====" + e.toString() + "****" + option.path);
 
-      return new ResultData(response.data, false, response.statusCode,
+      response.data = ResultData(response.data, false, response.statusCode,
           headers: response.headers);
+      handler.next(response);
     }
 
-    return new ResultData(response.data, false, response.statusCode,
-        headers: response.headers);
+    response.data = ResultData(response.data, false, response.statusCode, headers: response.headers);
+    handler.next(response);
   }
 }
